@@ -1,22 +1,27 @@
-# Defaults to TTN server v2, EU region
-TTN_STACK_VERSION=${TTN_STACK_VERSION:-2}
-if [ $TTN_STACK_VERSION -eq 2 ]; then
-	TTN_REGION=${TTN_REGION:-"eu"}
-	TC_URI=${TC_URI:-"wss://lns.${TTN_REGION}.thethings.network:443"} 
+# Options are AWS, TTS (open source The Things Stack), or TTN (default v3)
+# No default option, this variable is required!
+
+# LNS_SERVICE=${LNS_SERVICE:-2}
+if [ $LNS_SERVICE -eq AWS ]; then
+	echo -e "[INFO] LNS_SERVICE is set to AWS, retreive your TC_URI (LNS Endpoint URL) and xxx from AWS LoRaWAN console."
+	TC_URI= ###
 	TC_TRUST=${TC_TRUST:-$(curl --silent "https://letsencrypt.org/certs/trustid-x3-root.pem.txt")}
-elif [ $TTN_STACK_VERSION -eq 3 ]; then
-	TTN_REGION=${TTN_REGION:-"eu1"}
-	TC_URI=${TC_URI:-"wss://${TTN_REGION}.cloud.thethings.network:8887"} 
+elif [ $LNS_SERVICE -eq TTS ]; then
+	echo -e "[INFO] LNS_SERVICE is set to TTS, retreive your TC_URI (LNS Endpoint URL) and xxx from your TTS console."
+	TC_URI= ###
 	TC_TRUST=${TC_TRUST:-$(curl --silent "https://letsencrypt.org/certs/{trustid-x3-root.pem.txt,isrgrootx1.pem}")}
+elif [ $LNS_SERVICE -eq TTN ]; then
+	echo -e "[INFO] LNS_SERVICE is set to AWS, retreive your TC_URI (LNS Endpoint URL) and xxx from the TTN console."
+	# SET TTN information
 else
-    echo -e "\033[91mERROR: Wrong TTN_STACK_VERSION value, should be either 2 o 3.\033[0m"
+    echo -e "[ERROR] LNS_SERVICE is incorrectly configured, should be either AWS, TTS, or TTN!"
 	balena-idle
 fi
 
 # Check configuration
 if [ "$TC_URI" == "" ] || [ "$TC_TRUST" == "" ]
 then
-    echo -e "\033[91mERROR: Missing configuration, define either TTN_STACK_VERSION or TC_URI and TC_TRUST.\033[0m"
+    echo -e "[ERROR] Missing configuration, define either LNS_SERVICE or TC_URI and TC_TRUST.\033[0m"
 	balena-idle
 fi
 

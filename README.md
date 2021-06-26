@@ -1,3 +1,15 @@
+# Project Overview
+
+This fork of Balena's Basicstation is to enable AWS LoRaWAN as a variable option.
+Objectives:
+- [ ] Offer 3 network server options as variables. AWS, TTS, and TTN.
+- [ ] Potentially offer a 4th, CHRP
+- [ ] Make certs setup for all options into variables
+- [ ] Continue to permit SX1301 and SX1302 support
+- [ ] Add Basicstation log level and log location variable support
+- [ ] Add CUPS option
+
+
 # LoRa Basics™ Station using balena.io with sx1301 and sx1302 LoRa concentrators
 
 This project deploys a LoRaWAN gateway with Basics™ Station Packet Forward protocol with balena. It runs on a Raspberry Pi (3/4) or balenaFin with sx1301 and sx1302 LoRa concentrators (e.g. RAK833, RAK2245, RAK2287 and IMST iC880a among others).
