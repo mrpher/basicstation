@@ -3,11 +3,13 @@
 This fork of Balena's Basicstation is to enable AWS LoRaWAN as a variable option.
 Objectives:
 - [ ] Offer 3 network server options as variables. AWS, TTS, and TTN.
-- [ ] Potentially offer a 4th, CHRP
+- [ ] Potentially offer a 4th, CHRP for Chirpstack
 - [ ] Make certs setup for all options into variables
 - [ ] Continue to permit SX1301 and SX1302 support
 - [ ] Add Basicstation log level and log location variable support
 - [ ] Add CUPS option
+- [ ] Add datadog iot option (commented out)
+- [ ] Fix documentation accordingly
 
 
 # LoRa Basics™ Station using balena.io with sx1301 and sx1302 LoRa concentrators
@@ -55,6 +57,7 @@ Once all of this is ready, you are able to deploy this repository following inst
 Running this project is as simple as deploying it to a balenaCloud application. You can do it in just one click by using the button below:
 
 [![](https://www.balena.io/deploy.png)](https://dashboard.balena-cloud.com/deploy?repoUrl=https://github.com/balenalabs/basicstation)
+# TODO Fix this repo URL
 
 Follow instructions, click Add a Device and flash an SD card with that OS image dowloaded from balenaCloud. Enjoy the magic 🌟Over-The-Air🌟!
 
@@ -83,7 +86,16 @@ In case that your LoRa concentrator is a ```RAK2287``` it is using ```SX1302```.
 
 That enables a fleet of LoRa gateways with both (e.g.) ```RAK2245``` and ```RAK2287``` together under the same app.
 
-### Define your REGION and TTN STACK VERSION
+### Define your LNS_SERVICE
+
+A LoRa Network Server (LNS) is a critical part of any LoRa network.  There are several options when choosing a network server with some of the most popular including options from The Things Network, The Things Industries, Chirpstack and AWS.  
+- [The Things Network](https://www.thethingsnetwork.org/) (`TTN`)
+- [The Thing Industries - Cloud Hosted](https://www.thethingsindustries.com/deployment/) (`TTI`)
+- [The Things Industries - Open Source Stack](https://www.thethingsindustries.com/stack/) (`TTS`)
+- [AWS IoT Core for LoRaWAN](https://aws.amazon.com/iot-core/lorawan/) (`AWS`)
+- [Chirpstack](https://www.chirpstack.io/) (`CHRP`)
+
+This project supports all 5 options listed above.  You are required to chose ....
 
 From now it's important to facilitate the ```TTN_STACK_VERSION``` that you are going to use: ```3``` (The Things Stack v3) or ```2``` (The Things Network or TTN V2). The default variable is set into ```3```(V3).
 
