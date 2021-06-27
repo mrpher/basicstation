@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 TAG_KEY="EUI"
-GATEWAY_EUI=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | sed -e 's#\(.\{6\}\)\(.*\)#\1fffe\2#g')
+GATEWAY_EUI=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | sed -e 's#\(.\{6\}\)\(.*\)#\1fffe\2#g' | tr [:lower:] [:upper:])
 
 echo "Gateway EUI: $GATEWAY_EUI"
 

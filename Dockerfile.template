@@ -24,4 +24,4 @@ COPY --from=builder /usr/src/app/ ./
 COPY start* ./
 
 # Launch our binary on container startup.
-CMD ["bash", "start.sh"]
+CMD ["bash", "start.sh"] #TODO Set to the right start script (ie. start_all.sh)
