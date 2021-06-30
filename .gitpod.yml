@@ -1,0 +1,4 @@
+vscode:
+  extensions:
+    - bungcip.better-toml
+    - wayou.vscode-todo-highlight

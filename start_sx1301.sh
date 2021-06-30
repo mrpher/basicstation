@@ -3,15 +3,18 @@
 # Load common variables
 source ./start_common.sh
 
-# Change to project folder
+###############################
+# CHANGE TO EXAMPLE FOLDER 
+###############################
 cd examples/live-s2.sm.tc
 
-# Setup TC files from environment
-echo "$TC_URI" > tc.uri
-echo "$TC_TRUST" > tc.trust
-if [ ! -z ${TC_KEY} ]; then
-	echo "Authorization: Bearer $TC_KEY" | perl -p -e 's/\r\n|\n|\r/\r\n/g'  > tc.key
-fi
+#TODO Move TC setup to start_sx1301.sh or start_sx1302.sh
+# # Setup TC files from environment
+# echo "$TC_URI" > tc.uri
+# echo "$TC_TRUST" > tc.trust
+# if [ ! -z ${TC_KEY} ]; then
+# 	echo "Authorization: Bearer $TC_KEY" | perl -p -e 's/\r\n|\n|\r/\r\n/g'  > tc.key
+# fi
 
 # Reset gateway
 echo "Resetting gateway concentrator on GPIO $GW_RESET_GPIO"
