@@ -1,9 +1,12 @@
-# More information: https://docs.aws.amazon.com/iot/latest/developerguide/x509-client-certs.html
-
 #!/usr/bin/env bash 
 
 ###############################
-# SET TRUST CERTIFICATES 
+# AWS IOT LORAWAN 
+# More information to automate: https://docs.aws.amazon.com/iot/latest/developerguide/x509-client-certs.html
+###############################
+
+###############################
+# CHECK TRUST CERTIFICATES 
 ###############################
 if [ "$TC_TRUST" == "" ]; then
     echo "${WARNING_COLOR} `date -u` [WARNING] No TC_TRUST configured. ${CLEAR_COLOR}"
@@ -30,10 +33,10 @@ GW_RESET_GPIO=${GW_RESET_GPIO:-${pinToGPIO[$GW_RESET_PIN]}}
 LORAGW_SPI=${LORAGW_SPI:-"/dev/spidev0.0"}
 
 ###############################
-# CHECK MODEL VARIABLE 
+# CHECK CONCENTRATOR_MODEL VARIABLE 
 ###############################
-if [ "$MODEL" = "SX1301" ]; then
-    echo "`date -u` [INFO] Gateway Concentrator: SX1301"
+if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
+    echo "`date -u` [INFO] Gateway Concentrator: ${CONCENTRATOR_MODEL}"
     cd examples/live-s2.sm.tc
 
     echo "$TC_CRT" > tc.crt
@@ -53,22 +56,23 @@ if [ "$MODEL" = "SX1301" ]; then
     echo $GW_RESET_GPIO > /sys/class/gpio/unexport
     RADIODEV=$LORAGW_SPI ../../build-rpi-std/bin/station
 
-elif [ "$MODEL" = "SX1302" ]; then
-    echo "`date -u`[INFO] Gateway Concentrator: SX1302"
-    cd examples/corecell
-    # Setup TC files from environment
-    # TODO Fix echo destination for AWS
-    echo "$TC_URI" > ./lns-ttn/tc.uri
-    echo "$TC_TRUST" > ./lns-ttn/tc.trust
-    if [ ! -z ${TC_KEY} ]; then
-        echo "Authorization: Bearer $TC_KEY" | perl -p -e 's/\r\n|\n|\r/\r\n/g'  > ./lns-ttn/tc.key
-    fi
+elif [ "$CONCENTRATOR_MODEL" = "SX1302" ]; then
+    echo "`date -u`[INFO] Gateway Concentrator: ${CONCENTRATOR_MODEL}"
+    echo "`date -u` [WARNING] SX103 is not supported - YET :)"
+    # cd examples/corecell
+    # # Setup TC files from environment
+    # # TODO Fix echo destination for AWS
+    # echo "$TC_URI" > ./lns-ttn/tc.uri
+    # echo "$TC_TRUST" > ./lns-ttn/tc.trust
+    # if [ ! -z ${TC_KEY} ]; then
+    #     echo "Authorization: Bearer $TC_KEY" | perl -p -e 's/\r\n|\n|\r/\r\n/g'  > ./lns-ttn/tc.key
+    # fi
 
-    # Set other environment variables
-    export GW_RESET_GPIO=$GW_RESET_GPIO
-    ./start-station.sh -l ./lns-ttn
+    # # Set other environment variables
+    # export GW_RESET_GPIO=$GW_RESET_GPIO
+    # ./start-station.sh -l ./lns-ttn
 else
-    echo "${WARNING_COLOR} `date -u` [WARNING] No MODEL variable configured. Please choose SX1301 or SX1302. ${CLEAR_COLOR}"
+    echo "${WARNING_COLOR} `date -u` [WARNING] CONCENTRATOR_MODEL variable misconfigured. Please choose SX1301 or SX1302. ${CLEAR_COLOR}"
     balena-idle
 fi
 

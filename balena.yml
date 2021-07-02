@@ -1,8 +1,8 @@
-name: The Things Stack Gateway
+name: BasicStation Gateway
 type: sw.application
 description: >-
-  Deploys the The Things Stack LoRaWAN gateway with Basics Station 
-  Packet Forward protocol on SX1301 or SX1302 LoRa concentrators.
+  Deploys the Semtech's Basics Station using the SX1301 or SX1302 LoRa concentrators
+  and multiple LoRa network server options including AWS, The Things Stack, The Things Network and Chirpstack.
 joinable: false
 post-provisioning: >-
   ## Usage instructions
@@ -14,7 +14,7 @@ assets:
   repository:
     type: blob.asset
     data:
-      url: 'https://github.com/balenalabs/basicstation'
+      url: 'https://github.com/mrpher/basicstation'
   logo:
     type: blob.asset
     data:
