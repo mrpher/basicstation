@@ -32,32 +32,25 @@
 # More info: https://iotwireless.workshop.aws/en/700_advanced/dyigw_rak2245.html
 ###############################
 # TODO Make logic of CUPS vs LNS choice more intuitive? ie. If AWS_URI is cups then do not require LNS_TRUST, if AWS_URI is lns/wss do not require CUPS_TRUST?
-if [ "$CUPS_TRUST" == "" ]; then
-    echo -e "${WARNING_COLOR} `date -u` [WARNING] CUPS_TRUST variable misconfigured. Download from AWS console and copy contents of cups.trust file. ${CLEAR_COLOR}"
+if [ "$CUPS_TRUST_BASE64" == "" ]; then
+    echo -e "${WARNING_COLOR} `date -u` [WARNING] CUPS_TRUST_BASE64 variable misconfigured. Download from AWS console and copy contents of cups.trust file. ${CLEAR_COLOR}"
+    balena-idle
     fi
 # if [ "$LNS_TRUST" == "" ]; then
 #     echo "${WARNING_COLOR} `date -u` [WARNING] LNS_TRUST variable misconfigured. Download from AWS console and copy contents of lns.trust file. ${CLEAR_COLOR}"
 #     fi
-if [ "$CUPS_CRT" == "" ]; then
-    echo -e "${WARNING_COLOR} `date -u` [WARNING] CUPS_CRT variable misconfigured. Download from AWS console and copy contents of XXXXX.cert.pem file. ${CLEAR_COLOR}"
+if [ "$CUPS_CRT_BASE64" == "" ]; then
+    echo -e "${WARNING_COLOR} `date -u` [WARNING] CUPS_CRT_BASE64 variable misconfigured. Download from AWS console and copy contents of XXXXX.cert.pem file. ${CLEAR_COLOR}"
+    balena-idle
     fi
-if [ "$CUPS_KEY" == "" ]; then
-    echo -e "${WARNING_COLOR} `date -u` [WARNING] CUPS_KEY variable misconfigured. Download from AWS console and copy contents of XXXXX.private.key file. ${CLEAR_COLOR}"
+if [ "$CUPS_KEY_BASE64" == "" ]; then
+    echo -e "${WARNING_COLOR} `date -u` [WARNING] CUPS_KEY_BASE64 variable misconfigured. Download from AWS console and copy contents of XXXXX.private.key file. ${CLEAR_COLOR}"
+    balena-idle
     fi
 if [ "$CUPS_URI" == "" ]; then
     echo -e "${WARNING_COLOR} `date -u` [WARNING] CUPS_URI variable misconfigured. Copy CUPS Endpoint (URI) from AWS console. ${CLEAR_COLOR}"
+    balena-idle
     fi
-
-balena-idle
-
-# ###############################
-# # SET COMMON HARDWARE PINS/GPIO 
-# ###############################
-# declare -a pinToGPIO
-# pinToGPIO=( -1 -1 -1 2 -1 3 -1 4 14 -1 15 17 18 27 -1 22 23 -1 24 10 -1 9 25 11 8 -1 7 0 1 5 -1 6 12 13 -1 19 16 26 20 -1 21)
-# GW_RESET_PIN=${GW_RESET_PIN:-11}
-# GW_RESET_GPIO=${GW_RESET_GPIO:-${pinToGPIO[$GW_RESET_PIN]}}
-# LORAGW_SPI=${LORAGW_SPI:-"/dev/spidev0.0"}
 
 ###############################
 # SET COMMON HARDWARE PINS/GPIO 
@@ -80,14 +73,15 @@ if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
     echo "`date -u` [INFO] Gateway Concentrator: ${CONCENTRATOR_MODEL}"
     cd examples/run_aws
 
-    echo "$CUPS_TRUST" > cups.trust
-    echo "$CUPS_CRT" > cups.crt
-    echo "$CUPS_KEY" > cups.key
-    echo "$CUPS_URI" > cups.uri
+    # Be sure to base64 encode the certs BEFORE entering into variables.
+    # Example: base64 cups.crt > cups.crt.base64 && base64 cups.trust > cups.trust.base64 && base64 cups.key > cups.key.base64
+    # Which will create files in the same folder.  Open, copy contents, and past into Balena variables. 
+    # OR base64 cups.crt and copy result one by one from the terminal.
+    echo $CUPS_TRUST_BASE64 | base64 --decode > cups.trust
+    echo $CUPS_CRT_BASE64 | base64 --decode > cups.crt
+    echo $CUPS_KEY_BASE64 | base64 --decode > cups.key
 
-    # TODO Permit both LNS/TC and CUPS?
-    # echo "$LNS_TRUST" > lns.trust
-    # echo "$LNS_URI" >
+    echo "$CUPS_URI" > cups.uri
 
     echo "`date -u` [INFO] GW_RESET_PIN is set to ${GW_RESET_PIN}"
     echo "`date -u` [INFO] GPIO_RESET_PIN is set to ${GW_RESET_GPIO}"
