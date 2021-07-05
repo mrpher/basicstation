@@ -33,18 +33,20 @@ echo "`date -u` [INFO] Gateway EUI: $GATEWAY_EUI"
 # GET DEVICE ID FROM API 
 ###############################
 ID=$(curl -sX GET "https://api.balena-cloud.com/v5/device?\$filter=uuid%20eq%20'$BALENA_DEVICE_UUID'" \
--H "Content-Type: application/json" \
--H "Authorization: Bearer $BALENA_API_KEY" | \
-jq ".d | .[0] | .id")
+	-H "Content-Type: application/json" \
+	-H "Authorization: Bearer $BALENA_API_KEY" | \
+	jq ".d | .[0] | .id"
+	)
 
 ###############################
 # SET GATEWAY EUI WITH API 
 ###############################
-TAG=$(curl -sX POST \
-"https://api.balena-cloud.com/v5/device_tag" \
--H "Content-Type: application/json" \
--H "Authorization: Bearer $BALENA_API_KEY" \
---data "{ \"device\": \"$ID\", \"tag_key\": \"GATEWAY_EUI\", \"value\": \"$GATEWAY_EUI\" }" > /dev/null)
+curl -sX POST \
+	"https://api.balena-cloud.com/v5/device_tag" \
+	-H "Content-Type: application/json" \
+	-H "Authorization: Bearer $BALENA_API_KEY" \
+	--data "{ \"device\": \"$ID\", \"tag_key\": \"GATEWAY_EUI\", \"value\": \"$GATEWAY_EUI\" }" > /dev/null
+	
 # TODO See if you can set multiple tags in this one api call (ie. GATEWAY_EUI and MODEM_MODEL)
 
 ###############################
@@ -53,6 +55,9 @@ TAG=$(curl -sX POST \
 if [ $LNS_SERVICE == "AWS" ]; then
     echo -e "`date -u` [INFO] LNS_SERVICE is set to AWS IoT LoRaWAN."
     ./start_aws.sh
+elif [ $LNS_SERVICE == "AUTOAWS" ]; then
+	echo -e "`date -u` [INFO] LNS_SERVICE is set to Auto AWS IoT LoRaWAN."
+	./start_auto_aws.sh
 elif [ $LNS_SERVICE == "TTS" ]; then
 	echo -e "`date -u` [INFO] LNS_SERVICE is set to The Things Stack."
 	./start_tts.sh
@@ -63,7 +68,7 @@ elif [ $LNS_SERVICE == "CHRP" ]; then
 	echo -e "`date -u` [INFO] LNS_SERVICE is set to Chirpstack."
     ./start_chrp.sh
 else
-    echo -e "${ERROR_COLOR} `date -u` [ERROR] LNS_SERVICE variable misconfigured. Valid options are AWS, TTS, TTN, or CHRP. ${CLEAR_COLOR}"
+    echo -e "${ERROR_COLOR} `date -u` [ERROR] LNS_SERVICE variable misconfigured. Valid options are AWS, AUTOAWS, TTS, TTN, or CHRP. ${CLEAR_COLOR}"
 	balena-idle
 fi
 

@@ -17,14 +17,21 @@ FROM balenalib/%%BALENA_MACHINE_NAME%%-debian:buster
 
 RUN install_packages jq
 
+
 WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/ ./
 
 COPY start* ./
 
+# TODO Add install AWS CLI steps here!
+CMD curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+CMD unzip awscliv2.zip
+CMD sudo ./aws/install
+
 # Make scripts executable
-RUN ["chmod", "+x", "./start_aws.sh"]
+RUN ["chmod", "+x", "start_aws.sh"]
+RUN ["chmod", "+x", "start_auto_aws.sh"]
 # TODO Can chmod all scripts with "*.sh"??
 
 # Launch our binary on container startup.
