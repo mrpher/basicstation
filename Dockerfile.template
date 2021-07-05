@@ -15,7 +15,7 @@ RUN make platform=corecell variant=std arch=%%BALENA_ARCH%%
 
 FROM balenalib/%%BALENA_MACHINE_NAME%%-debian:buster
 
-RUN install_packages jq
+RUN install_packages jq unzip
 
 
 WORKDIR /usr/src/app
@@ -24,7 +24,6 @@ COPY --from=builder /usr/src/app/ ./
 
 COPY start* ./
 
-# TODO Add install AWS CLI steps here!
 CMD curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
 CMD unzip awscliv2.zip
 CMD sudo ./aws/install
