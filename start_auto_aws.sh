@@ -88,7 +88,6 @@ if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
         --lorawan GatewayEui="$GATEWAY_EUI",RfRegion="$LORA_REGION" \
         --region "$AWS_REGION" \
         --tags Key="BALENA_DEVICE_UUID",Value="$BALENA_DEVICE_UUID" Key="BALENA_APP_ID",Value="$BALENA_APP_ID" Key="BALENA_APP_NAME",Value="$BALENA_APP_NAME" Key="BALENA_DEVICE_NAME_AT_INIT",Value="$BALENA_DEVICE_NAME_AT_INIT" Key="BALENA_DEVICE_TYPE",Value="$BALENA_DEVICE_TYPE"
-    )
 
     sleep 1
 
