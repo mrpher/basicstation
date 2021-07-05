@@ -4,10 +4,9 @@
 # SET ECHO COLORS 
 ###############################
 ERROR_COLOR="\033[31m"
-WARNING_COLOR="\033[33m"
+WARN_COLOR="\033[33m"
 CLEAR_COLOR="\033[0m"
 
-echo "`date -u` [INFO] Initiating Basicstation setup ..."
 
 ###############################
 # GET GATEWAY EUI FROM ETH0
@@ -15,8 +14,8 @@ echo "`date -u` [INFO] Initiating Basicstation setup ..."
 # TODO How to make this visible to Datadog tags?  Datadog container WONT have mmcli 
 GATEWAY_MAC=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | tr [:lower:] [:upper:])
 GATEWAY_EUI=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | sed -e 's#\(.\{6\}\)\(.*\)#\1fffe\2#g' | tr [:lower:] [:upper:])
-echo "`date -u` [INFO] Gateway MAC: $GATEWAY_MAC"
-echo "`date -u` [INFO] Gateway EUI: $GATEWAY_EUI"
+echo "`date -u` [INFO] Initiating Basicstation setup with Gateway EUI: $GATEWAY_EUI based on eth0 MAC Address: $GATEWAY_MAC ..."
+
 
 ###############################
 # GET MODEM DETAILS
@@ -29,25 +28,6 @@ echo "`date -u` [INFO] Gateway EUI: $GATEWAY_EUI"
 # echo "`date -u` [INFO] Modem IMEI: $MODEM_IMEI"
 # echo "`date -u` [INFO] Modem Model: $MODEM_MODEL"
 
-###############################
-# GET DEVICE ID FROM API 
-###############################
-ID=$(curl -sX GET "https://api.balena-cloud.com/v5/device?\$filter=uuid%20eq%20'$BALENA_DEVICE_UUID'" \
-	-H "Content-Type: application/json" \
-	-H "Authorization: Bearer $BALENA_API_KEY" | \
-	jq ".d | .[0] | .id"
-	)
-
-###############################
-# SET GATEWAY EUI WITH API 
-###############################
-curl -sX POST \
-	"https://api.balena-cloud.com/v5/device_tag" \
-	-H "Content-Type: application/json" \
-	-H "Authorization: Bearer $BALENA_API_KEY" \
-	--data "{ \"device\": \"$ID\", \"tag_key\": \"GATEWAY_EUI\", \"value\": \"$GATEWAY_EUI\" }" > /dev/null
-	
-# TODO See if you can set multiple tags in this one api call (ie. GATEWAY_EUI and MODEM_MODEL)
 
 ###############################
 # CHECK LNS_SERVICE VARIABLE
