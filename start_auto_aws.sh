@@ -18,20 +18,6 @@ GATEWAY_MAC=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | tr [:lower:
 GATEWAY_EUI=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | sed -e 's#\(.\{6\}\)\(.*\)#\1fffe\2#g' | tr [:lower:] [:upper:])
 echo "`date -u` [INFO] Initiating Basicstation setup with Gateway EUI: $GATEWAY_EUI based on eth0 MAC Address: $GATEWAY_MAC ..."
 
-
-###############################
-# CHECK AWS CLI CREDENTIALS 
-###############################
-if [ "$AWS_ACCESS_KEY_ID" == "" ]; then
-    echo -e "${ERROR_COLOR} `date -u` [ERROR] AWS_ACCESS_KEY_ID variable misconfigured. Get credentials from the AWS web console. ${CLEAR_COLOR}"
-    balena-idle
-    fi
-if [ "$AWS_SECRET_ACCESS_KEY" == "" ]; then
-    echo -e "${ERROR_COLOR} `date -u` [ERROR] AWS_SECRET_ACCESS_KEY variable misconfigured. Get credentials from the AWS web console. ${CLEAR_COLOR}"
-    balena-idle
-    fi
-
-
 ###############################
 # SET COMMON HARDWARE PINS/GPIO 
 ###############################
@@ -59,12 +45,19 @@ if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
     # More info: https://github.com/aws-samples/aws-iot-core-lorawan/tree/main/automation
     ###############################
     if [ "$AWS_REGION" == "" ]; then 
-        # TODO Beware this may conflict with the CLI default variable named the same!
         echo -e "${ERROR_COLOR} `date -u` [ERROR] AWS_REGION variable is misconfigured. Choose us-east-1 or eu-west-1. ${CLEAR_COLOR}"
         balena-idle
         fi
     if [ "$LORA_REGION" == "" ]; then
-        echo -e "${ERROR_COLOR} `dte -u` [ERROR] LORA_REGION variable is misconfigured. Choose US915, EU868, AU915, AS923-1. ${CLEAR_COLOR}"
+        echo -e "${ERROR_COLOR} `date -u` [ERROR] LORA_REGION variable is misconfigured. Choose US915, EU868, AU915, AS923-1. ${CLEAR_COLOR}"
+        balena-idle
+        fi
+    if [ "$AWS_ACCESS_KEY_ID" == "" ]; then
+        echo -e "${ERROR_COLOR} `date -u` [ERROR] AWS_ACCESS_KEY_ID variable misconfigured. Get credentials from the AWS web console. ${CLEAR_COLOR}"
+        balena-idle
+        fi
+    if [ "$AWS_SECRET_ACCESS_KEY" == "" ]; then
+        echo -e "${ERROR_COLOR} `date -u` [ERROR] AWS_SECRET_ACCESS_KEY variable misconfigured. Get credentials from the AWS web console. ${CLEAR_COLOR}"
         balena-idle
         fi
 
@@ -74,24 +67,25 @@ if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
     AWS_GATEWAY_EUI=$(aws iotwireless get-wireless-gateway \
         --identifier "$GATEWAY_EUI" \
         --identifier-type GatewayEui  \
-        | jq -r '.LoRaWAN.GatewayEui'
-        )
+        | jq -r '.LoRaWAN.GatewayEui')
 
     if [ "$AWS_GATEWAY_EUI" == "$GATEWAY_EUI" ]; then
         echo -e "${ERROR_COLOR} `date -u` [ERROR] Gateway already exists in AWS with a Gateway EUI of $AWS_GATEWAY_EUI"
         balena-idle
     else
-        echo "`date -u` Gateway does not exist yet in AWS, creating now ..."
+        echo "`date -u` [INFO] Gateway does not exist yet in AWS, creating now ..."
     fi
 
     ###############################
     # CREATE GATEWAY AT AWS
     ###############################
+    GATEWAY_CREATE_DATE=$(date)
+
     aws iotwireless create-wireless-gateway --name "$BALENA_DEVICE_NAME_AT_INIT" \
-        --description "Gateway automatically provisioned by Balena.  https://dashboard.balena-cloud.com/devices/$BALENA_DEVICE_UUID" \
+        --description "Gateway automatically provisioned by Balena.  https://dashboard.balena-cloud.com/devices/'$BALENA_DEVICE_UUID'" \
         --lorawan GatewayEui="$GATEWAY_EUI",RfRegion="$LORA_REGION" \
         --region "$AWS_REGION" \
-        --tags Key="BALENA_DEVICE_UUID",Value="$BALENA_DEVICE_UUID" Key="BALENA_APP_ID",Value="$BALENA_APP_ID" Key="BALENA_APP_NAME",Value="$BALENA_APP_NAME" Key="BALENA_DEVICE_NAME_AT_INIT",Value="$BALENA_DEVICE_NAME_AT_INIT" Key="BALENA_DEVICE_TYPE",Value="$BALENA_DEVICE_TYPE"
+        --tags Key="GATEWAY_CREATE_DATE",Value="$GATEWAY_CREATE_DATE" Key="BALENA_DEVICE_UUID",Value="$BALENA_DEVICE_UUID" Key="BALENA_APP_ID",Value="$BALENA_APP_ID" Key="BALENA_APP_NAME",Value="$BALENA_APP_NAME" Key="BALENA_DEVICE_NAME_AT_INIT",Value="$BALENA_DEVICE_NAME_AT_INIT" Key="BALENA_DEVICE_TYPE",Value="$BALENA_DEVICE_TYPE"
 
     sleep 1
 
@@ -102,9 +96,6 @@ if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
         --identifier "$GATEWAY_EUI" \
         --identifier-type GatewayEui | jq -r .Id)
 
-    echo "`date -u` [INFO] Created gateway in AWS with Gateway Id of $AWS_GATEWAY_ID"
-    echo -e "`date -u` [INFO] Visit gateway dashboard: https://console.aws.amazon.com/iot/home?region=$AWS_REGION#/wireless/gateways/details/$AWS_GATEWAY_ID"
-
     ###############################
     # GET GATEWAY ARN FROM AWS
     ###############################
@@ -112,9 +103,12 @@ if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
         --identifier "$GATEWAY_EUI" \
         --identifier-type GatewayEui | jq -r .Arn)
     
+    echo -e "`date -u` [INFO] Gateway successfully created in AWS: https://console.aws.amazon.com/iot/home?region=$AWS_REGION#/wireless/gateways/details/$AWS_GATEWAY_ID"
+
     ###############################
     # CREATE & ASSOCIATE AWS CERTIFICATES
     ###############################
+    # TODO Send these into persistent storage?
     AWS_CERTIFICATE_ID=$(aws iot create-keys-and-certificate \
         --set-as-active \
         --certificate-pem-outfile gateway.certificate.pem \
@@ -129,7 +123,7 @@ if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
     ###############################
     # DOWNLOAD CUPS/LNS FILS FROM AWS
     ###############################
-    # TODO Make sure these are writing to the correct folder
+    # TODO Send these into persistent storage?
     aws iotwireless get-service-endpoint --service-type CUPS --region $AWS_REGION | jq -r .ServerTrust > cups_server_trust.pem
     aws iotwireless get-service-endpoint --service-type LNS --region $AWS_REGION | jq -r .ServerTrust > lns_server_trust.pem
     aws iotwireless get-service-endpoint --service-type CUPS --region $AWS_REGION | jq -r .ServiceEndpoint > cups.uri
@@ -141,8 +135,7 @@ if [ "$CONCENTRATOR_MODEL" = "SX1301" ]; then
     ID=$(curl -sX GET "https://api.balena-cloud.com/v5/device?\$filter=uuid%20eq%20'$BALENA_DEVICE_UUID'" \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $BALENA_API_KEY" | \
-        jq ".d | .[0] | .id"
-        )
+        jq ".d | .[0] | .id")
 
     ###############################
     # CREATE BALENA TAGS USING API 
