@@ -9,12 +9,15 @@
 # More: https://iotwireless.workshop.aws/en/700_advanced/dyigw_rak2245.html
 ###############################
 
+
 ###############################
-# SET ECHO COLORS 
+# GET GATEWAY EUI FROM ETH0
 ###############################
-ERROR_COLOR="\033[31m"
-WARN_COLOR="\033[33m"
-CLEAR_COLOR="\033[0m"
+# TODO How to make this visible to Datadog tags?  Datadog container WONT have mmcli 
+GATEWAY_MAC=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | tr [:lower:] [:upper:])
+GATEWAY_EUI=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | sed -e 's#\(.\{6\}\)\(.*\)#\1fffe\2#g' | tr [:lower:] [:upper:])
+echo "`date -u` [INFO] Initiating Basicstation setup with Gateway EUI: $GATEWAY_EUI based on eth0 MAC Address: $GATEWAY_MAC ..."
+
 
 ###############################
 # CHECK AWS CLI CREDENTIALS 
@@ -27,6 +30,7 @@ if [ "$AWS_SECRET_ACCESS_KEY" == "" ]; then
     echo -e "${ERROR_COLOR} `date -u` [ERROR] AWS_SECRET_ACCESS_KEY variable misconfigured. Get credentials from the AWS web console. ${CLEAR_COLOR}"
     balena-idle
     fi
+
 
 ###############################
 # SET COMMON HARDWARE PINS/GPIO 

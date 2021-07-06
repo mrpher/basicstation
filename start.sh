@@ -3,19 +3,9 @@
 ###############################
 # SET ECHO COLORS 
 ###############################
-ERROR_COLOR="\033[31m"
-WARN_COLOR="\033[33m"
-CLEAR_COLOR="\033[0m"
-
-
-###############################
-# GET GATEWAY EUI FROM ETH0
-###############################
-# TODO How to make this visible to Datadog tags?  Datadog container WONT have mmcli 
-GATEWAY_MAC=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | tr [:lower:] [:upper:])
-GATEWAY_EUI=$(cat /sys/class/net/eth0/address | sed -r 's/[:]+//g' | sed -e 's#\(.\{6\}\)\(.*\)#\1fffe\2#g' | tr [:lower:] [:upper:])
-echo "`date -u` [INFO] Initiating Basicstation setup with Gateway EUI: $GATEWAY_EUI based on eth0 MAC Address: $GATEWAY_MAC ..."
-
+export ERROR_COLOR="\033[31m"
+export WARN_COLOR="\033[33m"
+export CLEAR_COLOR="\033[0m"
 
 ###############################
 # GET MODEM DETAILS
